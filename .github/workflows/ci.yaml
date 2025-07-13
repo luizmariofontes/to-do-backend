@@ -81,3 +81,22 @@ jobs:
           tags: |
             luizmario/to-do-backend:latest
             luizmario/to-do-backend:${{ github.sha }}
+
+  deploy-to-ec2:
+    name: Deploy to EC2 via SSH
+    runs-on: ubuntu-latest
+    needs: build-and-push
+
+    steps:
+      - name: Executar SSH na instância EC2 e reiniciar Docker Compose
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            cd /opt/app/
+            docker-compose pull
+            docker-compose down
+            docker-compose up -d
